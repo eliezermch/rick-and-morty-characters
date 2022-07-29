@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 
 // ---------- Components ---------- //
 import { Character } from "../character/Character";
@@ -23,29 +23,45 @@ interface CharacterProps {
 
 function CharacterRow({ page, searchValue }: CharacterProps) {
   const [state, dispacth] = useGlobatState();
+  const [currentCharacters, setCurrentCharacters] = useState<
+    Array<CharacterType>
+  >([]);
 
-  // let number: number = 1;
-  // for (let i = 1; i <= 10; i++) {
-  //   number = i;
-  //   console.log("🚀 ~ number", number);
-  // }
+  const allCharacters: CharacterType[] = [];
+
+  state.characters.forEach((charactersByPage: []) => {
+    allCharacters.push(...charactersByPage);
+  });
 
   // ---------- Call API ---------- //
   useEffect(() => {
     (async () => {
-      const data: CharacterType = await getCharacter(page);
-      dispacth({ characters: data });
+      if (state.characters[page - 1] === undefined) {
+        const data: CharacterType[] | any = await getCharacter(page);
+        dispacth({ characters: [...state.characters, data] });
+        setCurrentCharacters(data);
+      } else {
+        setCurrentCharacters(state.characters[page - 1]);
+      }
     })();
   }, [page]);
 
+  useEffect(() => {
+    if (searchValue === "") {
+      setCurrentCharacters(state.characters[page - 1]);
+    } else {
+      const filteredCharacters: CharacterType[] = allCharacters.filter(
+        (character: CharacterType) => {
+          return character.name
+            .toLowerCase()
+            .includes(searchValue.toLowerCase());
+        }
+      );
+      setCurrentCharacters(filteredCharacters);
+    }
+  }, [searchValue]);
+
   // ---------- Seacrh characters functions ---------- //
-  const filteredCharacters = useMemo(
-    () =>
-      state.characters.filter((character: CharacterType) => {
-        return character.name.toLowerCase().includes(searchValue.toLowerCase());
-      }),
-    [state.characters, searchValue]
-  );
 
   return (
     <div className="character-table-container">
@@ -61,7 +77,7 @@ function CharacterRow({ page, searchValue }: CharacterProps) {
           </tr>
         </thead>
 
-        {filteredCharacters.map((character: CharacterType) => (
+        {currentCharacters?.map((character: CharacterType) => (
           <Character
             key={character.id}
             id={character.id}
