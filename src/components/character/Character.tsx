@@ -1,67 +1,78 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
+// ---------- Components ---------- //
+import { CharacterDescription } from "../characterDescription/CharacterDescription";
+
+// ---------- Style ---------- //
 import "./character.css";
 
+// ---------- Icon ---------- //
 import eyeDetails from "../../assets/icons/icon-eye.png";
 
+// ---------- Interface Props ---------- //
 interface CharacterProps {
-  page: number | string;
+  id: number;
+  image: string;
+  name: string;
+  status: string;
+  species: string;
+  gender: string;
 }
 
-function Character({ page }: CharacterProps) {
-  const [characters, setCharacters] = useState([]);
+function Character({
+  id,
+  image,
+  name,
+  status,
+  species,
+  gender,
+}: CharacterProps) {
+  const [showDescription, setShowDescription] = useState<boolean>(false);
 
-  const truncate = (str: string, n: number) => {
-    return str?.length > n ? str.substr(0, n - 1) + "..." : str;
+  // ---------- Toggle Description ---------- //
+  const toggleDescription = () => {
+    setShowDescription(!showDescription);
   };
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const response = await fetch(
-          `https://rickandmortyapi.com/api/character/?page=${page.toString()}`
-        );
-        const data = await response.json();
-        setCharacters(data.results);
-      } catch (error) {
-        console.log(error);
-      }
-    })();
-  }, [page]);
+  // ---------- Truncate ---------- //
+  const truncate = (str: string, n: number) => {
+    return str?.length > n ? str.substring(0, n - 1) + "..." : str;
+  };
 
   return (
-    <div className="characters-container">
-      {characters.map((character: any) => (
-        <div key={character.id} className="characters-subcontainer">
-          <ul>
-            <li>
-              <img className="characters-img" src={character.image} alt="" />
-            </li>
-            <li className="characters-name">
-              <p>{truncate(character.name, 13)}</p>
-            </li>
-            <li>
-              <p>{character.status}</p>
-            </li>
-            <li>
-              <p>{character.species}</p>
-            </li>
-            <li>
-              <p>{character.gender}</p>
-            </li>
-            <li>
-              <button className="characters-detail-button">
-                <img
-                  className="characters-detail-img"
-                  src={eyeDetails}
-                  alt=""
-                />
-              </button>
-            </li>
-          </ul>
-        </div>
-      ))}
-    </div>
+    <>
+      <tbody className="characters-container">
+        <tr key={id} className="characters-subcontainer">
+          <td>
+            <img className="characters-img" src={image} alt="" />
+          </td>
+          <td>{truncate(name, 12)}</td>
+          <td>{status}</td>
+          <td>{species}</td>
+          <td>{gender}</td>
+          <td>
+            <button
+              className="characters-detail-button"
+              onClick={toggleDescription}
+            >
+              <img
+                className="characters-detail-img"
+                src={eyeDetails}
+                alt="with eyes to view details"
+              />
+            </button>
+          </td>
+          {showDescription && (
+            <td>
+              <CharacterDescription
+                id={id}
+                toggleDescription={toggleDescription}
+              />
+            </td>
+          )}
+        </tr>
+      </tbody>
+    </>
   );
 }
 
