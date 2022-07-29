@@ -7,6 +7,8 @@ This is a project of Rick and Morty characters, consuming **The Rick and Morty A
 - Good file and folder structures.
 - React Hooks.
 
+see it: [here](https://rick-and-morty-e.vercel.app/)
+
 ## Available Scripts
 
 In the project directory, you can run:
